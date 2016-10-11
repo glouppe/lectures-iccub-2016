@@ -1,0 +1,635 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{etex}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{verbatim}
+\usepackage{url}
+\usepackage{moreverb}
+\usepackage{fancyvrb}
+\usepackage{natbib}
+\usepackage{eulervm}
+\usepackage{auto-pst-pdf}
+\usepackage{pst-plot}
+\usepackage{amssymb}
+\usepackage{pifont}
+\usepackage{algpseudocode}
+\usepackage{multirow}
+
+% Code snippets
+\usepackage{minted}
+\definecolor{rulecolor}{rgb}{0.80,0.80,0.80}
+\definecolor{bgcolor}{rgb}{1.0,1.0,1.0}
+\newminted{python}{bgcolor=bgcolor}
+
+% Checked marks
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+% Colors
+\newrgbcolor{mygreen}{.00 .5 .00}
+\newcommand{\X}[1]{\textcolor{blue}{#1}}
+\newcommand{\y}[1]{\textcolor{red}{#1}}
+\newcommand{\model}[1]{\textcolor{mygreen}{#1}}
+\newcommand{\loss}[1]{\textcolor{lightblue}{#1}}
+
+% Beamer layout
+\hypersetup{colorlinks=true, linkcolor=black, urlcolor=blue}
+\usetheme{boxes}
+\beamertemplatenavigationsymbolsempty
+\setbeamertemplate{sections/subsections in toc}[circle]
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{itemize subitem}[square]
+
+% Front slide
+\title{{\bf Supervised Learning: Non-parametric methods}}
+\author{
+Gilles Louppe (\href{https://twitter.com/glouppe}{@glouppe})
+}
+\date{October 17, 2016}
+
+% Argmax
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\begin{document}
+
+\begin{frame}[plain]
+\titlepage
+\end{frame}
+
+
+
+% Decision trees ======================================================
+
+\AtBeginSection[]
+{
+\begin{frame}[noframenumbering, plain]
+  \frametitle{Outline}
+  \tableofcontents[currentsection]
+  % Die Option [pausesections]
+\end{frame}
+}
+
+\section{Decision trees}
+
+\begin{frame}
+    \frametitle{Running example}
+
+    \begin{columns}
+    \begin{column}{0.5\textwidth}
+
+    \begin{center}
+    From {\bf \X{physicochemical properties}} (alcohol, acidity, sulphates, ...),
+
+    \vspace{1cm}
+    learn a {\bf \model{model}}
+    \vspace{1cm}
+
+    to predict {\bf \y{wine taste preferences}}.
+
+    \end{center}
+
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+      \vspace{-0.5cm}
+      \includegraphics[scale=0.6]{./figures/wine.jpg}
+      \end{figure}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+    \frametitle{Supervised learning}
+
+    \begin{itemize}
+    \item Data comes as a finite learning set ${\cal L} = \texttt{(\X{X}, \y{y})}$ where
+        \begin{itemize}
+            \item \X{Input samples} are given as an array of shape \texttt{(n\_samples, n\_features)}\\
+            \vspace{0.25cm}
+            E.g., feature values for wine physicochemical properties:
+\begin{verbatim}
+# fixed acidity, volatile acidity, ...
+X = [[  7.4    0.     ...   0.56   9.4    0.  ]
+     [  7.8    0.     ...   0.68   9.8    0.  ]
+                      ...
+     [  7.8    0.04   ...   0.65   9.8    0.  ]]
+\end{verbatim}
+\vspace{0.25cm}
+
+            \item \y{Output values} are given as an array of shape \texttt{(n\_samples,)}\\
+            \vspace{0.25cm}
+            E.g., wine taste preferences (from 0 to 10):
+\begin{verbatim}
+y = [5 5 5 ... 6 7 6]
+\end{verbatim}
+        \end{itemize}
+
+    \vspace{0.25cm}
+
+    \item The goal is to build an estimator $\model{f}: \X{{\cal X}} \mapsto \y{{\cal Y}}$ minimizing
+    $$
+    Err(f) = \mathbb{E}_{\X{X},\y{Y}}\{ L(\y{Y}, \model{f}(\X{X})) \}.
+    $$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Decision trees \citep{breiman:1984}}
+    \begin{columns}
+        \begin{column}{0.3\textwidth}
+            \begin{figure}
+            \includegraphics[width=\textwidth]{./figures/tree-partition-d.pdf}
+            \end{figure}
+        \end{column}
+        \begin{column}{0.7\textwidth}
+            \begin{figure}
+            \includegraphics[width=\textwidth]{./figures/tree-simple.pdf}
+            \end{figure}
+        \end{column}
+    \end{columns}
+
+{\scriptsize
+\begin{algorithmic}
+\Function{BuildDecisionTree}{${\cal L}$}
+    \State Create node $t$
+    \If{the stopping criterion is met for $t$}
+        \State Assign a model to $\widehat{y}_t$
+    \Else
+        \State Find the split on ${\cal L}$ that maximizes impurity decrease $$s^* = \argmax_{s} i(t) - p_L i(t^s_L) - p_R i(t^s_R)$$
+        \State Partition ${\cal L}$ into ${\cal L}_{t_L} \cup {\cal L}_{t_R}$ according to $s^*$
+        \State $t_L = \Call{BuildDecisionTree}{{\cal L}_{t_L}}$
+        \State $t_R = \Call{BuildDecisionTree}{{\cal L}_{t_R}}$
+    \EndIf
+    \State \Return $t$
+\EndFunction
+\end{algorithmic}
+}
+
+\end{frame}
+
+\begin{frame}
+    \begin{center}
+        (Demo)
+    \end{center}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Composability of decision trees}
+
+    Decision trees can be used to solve several machine learning tasks by
+    swapping the impurity and leaf model functions:
+
+    \vspace{0.5cm}
+
+    \begin{block}{0-1 loss (classification)}
+    $\widehat{y}_t = \argmax_{c \in {\cal Y}} p(c|t)$, $i(t) = \text{entropy}(t)$ or $i(t) = \text{gini}(t)$
+    \end{block}
+
+    \begin{block}{Mean squared error (regression)}
+    $\widehat{y}_t = \text{mean}(y|t)$, $i(t) = \frac{1}{N_t} \sum_{\mathbf{x}, y \in {\cal L}_t} (y - \widehat{y}_t)^2$
+    \end{block}
+
+    \begin{block}{Least absolute deviance (regression)}
+    $\widehat{y}_t = \text{median}(y|t)$, $i(t) = \frac{1}{N_t} \sum_{\mathbf{x}, y \in {\cal L}_t} |y - \widehat{y}_t|$
+    \end{block}
+
+    \begin{block}{Density estimation}
+    $\widehat{y}_t = {\cal N}(\mu_t, \Sigma_t)$, $i(t) = \text{differential entropy}(t)$
+    \end{block}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Sample weights}
+
+    Sample weights can be accounted for by adapting the impurity and leaf model functions.
+
+    \vspace{0.5cm}
+
+    \begin{block}{Weighted mean squared error}
+    $\widehat{y}_t = \frac{1}{\sum_{w} w} \sum_{\mathbf{x}, y, w \in {\cal L}_t} w y$\\
+    $i(t) = \frac{1}{\sum_{w} w}  \sum_{\mathbf{x}, y, w \in {\cal L}_t} w (y - \widehat{y}_t)^2$
+    \end{block}
+
+    \vspace{0.5cm}
+
+    Weights are assumed to be {\color{red}non-negative} since these quantities may otherwise be undefined. (E.g., what if $\sum_{w} w < 0$?)
+
+    % show an example for mse
+    % what about negative sample weights
+
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{\texttt{sklearn.tree}}
+
+{\scriptsize
+\begin{pythoncode}
+# Fit a decision tree
+from sklearn.tree import DecisionTreeRegressor
+estimator = DecisionTreeRegressor(criterion="mse",   # Set i(t) function
+                                  max_leaf_nodes=5)
+estimator.fit(X_train, y_train)
+
+# Predict target values
+y_pred = estimator.predict(X_test)
+
+# MSE on test data
+from sklearn.metrics import mean_squared_error
+score = mean_squared_error(y_test, y_pred)
+>>> 0.572049826453
+\end{pythoncode}
+}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Visualize and interpret}
+
+{\footnotesize
+\begin{pythoncode}
+# Display tree
+from sklearn.tree import export_graphviz
+export_graphviz(estimator, out_file="tree.dot",
+                feature_names=feature_names)
+\end{pythoncode}
+}
+
+\begin{figure}
+\includegraphics[width=0.8\textwidth]{./figures/wine-tree.png}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Strengths and weaknesses of decision trees}
+
+  \begin{itemize}
+    \item {\color{blue} Non-parametric} model, proved to be
+          {\color{blue} consistent}.
+
+    \vspace{0.25cm}
+
+    \item Support {\color{blue} heterogeneous} data (continuous, ordered or
+          categorical variables).
+
+    \vspace{0.25cm}
+
+    \item {\color{blue}Flexibility} in loss functions (but choice is
+          {\color{red}limited}).
+
+    \vspace{0.25cm}
+
+    \item {\color{blue} Fast} to train, {\color{blue} fast} to predict.
+        \begin{itemize}
+            \item In the average case, complexity of training is $\Theta(pN\log^2 N)$.
+        \end{itemize}
+
+    \vspace{0.25cm}
+
+    \item Easily {\color{blue} interpretable}.
+
+    \vspace{0.25cm}
+
+    \item {\color{blue} Low bias}, but usually {\color{red} high variance}\\
+        \begin{itemize}
+            \item Solution: Combine the predictions of several randomized
+                  trees into a single model.
+        \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+% Forests and boosting ========================================================
+
+\section{Forests of randomized trees}
+
+\begin{frame}
+    \frametitle{Random Forests \citep{breiman:2001,geurts:2006}}
+
+    \begin{figure}
+        \includegraphics[scale=0.5]{./figures/forest.pdf}
+    \end{figure}
+
+    Randomization
+
+    \vspace{0.1cm}
+
+    {\scriptsize
+    \begin{tabular}{lll}
+
+    \textbullet\hspace*{0.1cm} Bootstrap samples & \multirow{2}{*}{{\LARGE \}} {\color{blue} Random Forests}} & \\
+    \textbullet\hspace*{0.1cm} Random selection of $K \leq p$ split variables && \multirow{2}{*}{{\LARGE \}} {\color{blue} Extra-Trees}} \\
+    \textbullet\hspace*{0.1cm} Random selection of the threshold  & \\
+    \end{tabular}}
+\end{frame}
+
+\begin{frame}{Bias and variance}
+    \begin{figure}
+        \includegraphics[scale=0.7]{./figures/bias-variance-darts.jpg}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Bias-variance decomposition}
+
+{\bf Theorem.}
+For the squared error loss, the bias-variance decomposition of the expected
+generalization error $\mathbb{E}_{\cal L} \{ Err( \psi_{{\cal L},\theta_1,\dots,\theta_M}(\mathbf{x}))
+\}$ at $X=\mathbf{x}$ of an ensemble of $M$ randomized models $\varphi_{{\cal L},\theta_m}$ is
+\begin{equation*}
+\mathbb{E}_{\cal L} \{ Err(\psi_{{\cal L},\theta_1,\dots,\theta_M}(\mathbf{x})) \} = \text{noise}(\mathbf{x}) + \text{bias}^2(\mathbf{x}) + \text{var}(\mathbf{x}),
+\end{equation*}
+where
+\begin{align*}
+\text{noise}(\mathbf{x}) &= Err(\varphi_B(\mathbf{x})), \\
+\text{bias}^2(\mathbf{x}) &= (\varphi_B(\mathbf{x}) - \mathbb{E}_{{\cal L},\theta} \{ \varphi_{{\cal L},\theta}(\mathbf{x}) \} )^2, \\
+\text{var}(\mathbf{x}) &= \rho(\mathbf{x}) \sigma^2_{{\cal L},\theta}(\mathbf{x}) + \frac{1 - \rho(\mathbf{x})}{M} \sigma^2_{{\cal L},\theta}(\mathbf{x}).
+\end{align*}
+
+and where $\rho(\mathbf{x})$ is the Pearson correlation coefficient between
+the predictions of two randomized trees built on the same learning set.
+
+\end{frame}
+
+
+\begin{frame}{Diagnosing the error of random forests \citep{louppe2014understanding}}
+
+\begin{itemize}
+\item Bias: {\color{blue} Identical} to the bias of a single randomized tree.
+\item Variance: $\text{var}(\mathbf{x}) = \rho(\mathbf{x}) \sigma^2_{{\cal L},\theta}(\mathbf{x}) + \frac{1 - \rho(\mathbf{x})}{M} \sigma^2_{{\cal L},\theta}(\mathbf{x})$\\
+As $M \to \infty$, {\color{red} $\text{var}(\mathbf{x}) \to \rho(\mathbf{x}) \sigma^2_{{\cal L},\theta}(\mathbf{x})$}
+  \begin{itemize}
+    \item The stronger the randomization, $\rho(\mathbf{x}) \to 0$, $\text{var}(\mathbf{x}) \to 0$.
+    \item The weaker the randomization, $\rho(\mathbf{x}) \to 1$, $\text{var}(\mathbf{x}) \to \sigma^2_{{\cal L},\theta}(\mathbf{x})$
+  \end{itemize}
+\end{itemize}
+
+\vspace{1cm}
+
+{\bf Bias-variance trade-off.} Randomization increases bias but makes it
+possible to reduce the variance of the corresponding ensemble model. The crux
+of the problem is to {\color{red} find the right trade-off}.
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Tuning randomization in \texttt{sklearn.ensemble}}
+
+{\scriptsize
+\begin{pythoncode}
+from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
+from sklearn.cross_validation import ShuffleSplit
+from sklearn.learning_curve import validation_curve
+
+# Validation of max_features, controlling randomness in forests
+param_range = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+
+_, test_scores = validation_curve(
+    RandomForestRegressor(n_estimators=100, n_jobs=-1), X, y,
+    cv=ShuffleSplit(n=len(X), n_iter=10, test_size=0.25),
+    param_name="max_features", param_range=param_range,
+    scoring="mean_squared_error")
+test_scores_mean = np.mean(-test_scores, axis=1)
+plt.plot(param_range, test_scores_mean, label="RF", color="g")
+
+_, test_scores = validation_curve(
+    ExtraTreesRegressor(n_estimators=100, n_jobs=-1), X, y,
+    cv=ShuffleSplit(n=len(X), n_iter=10, test_size=0.25),
+    param_name="max_features", param_range=param_range,
+    scoring="mean_squared_error")
+test_scores_mean = np.mean(-test_scores, axis=1)
+plt.plot(param_range, test_scores_mean, label="ETs", color="r")
+\end{pythoncode}
+}
+\end{frame}
+
+
+\begin{frame}[fragile]
+    \frametitle{Tuning randomization in \texttt{sklearn.ensemble}}
+    \begin{figure}
+        \includegraphics[width=0.9\textwidth]{./figures/randomness.png}
+    \end{figure}
+
+    \begin{center}
+        Best-tradeoff: ExtraTrees, for \texttt{max\_features=6}.
+    \end{center}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Variable importances}
+
+{\scriptsize
+\begin{pythoncode}
+# Variable importances with Random Forest, default parameters
+forest = RandomForestRegressor(n_estimators=10000, n_jobs=-1).fit(X, y)
+forest.feature_importances_
+\end{pythoncode}
+}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Variable selection/ranking/exploration}
+
+  Tree-based models come with built-in methods for variable selection, ranking
+  or exploration.
+
+  \vspace{0.5cm}
+
+  The main goals are:
+  \begin{itemize}
+  \item To reduce training times;
+  \item To enhance generalisation by reducing overfitting;
+  \item To uncover relations between variables and ease model interpretation.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Variable importances}
+
+\begin{figure}
+\includegraphics[width=0.95\textwidth]{./figures/importances.png}
+\end{figure}
+
+\begin{center}
+Importances are measured only through the eyes of the model.
+{\color{red}They may not tell the entire nor the same story!} \citep{louppe:2013}
+\end{center}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Strengths and weaknesses of forests}
+
+  \begin{itemize}
+    \item One of the best off-the-self learning algorithm, requiring almost
+          no tuning.
+
+    \vspace{0.25cm}
+
+    \item {\color{blue}Fine control} of bias and variance through averaging
+          and randomization, resulting in {\color{blue} better performance}.
+
+    \vspace{0.25cm}
+
+    \item Moderately fast to train and to predict.
+        \begin{itemize}
+            \item $\Theta(MK\widetilde{N}\log^2 \widetilde{N})$ for RFs (where $\widetilde{N} = 0.632N$)
+            \item $\Theta(MKN\log N)$ for ETs
+        \end{itemize}
+
+    \vspace{0.25cm}
+
+    \item Embarrassingly {\color{blue} parallel} (use \texttt{n\_jobs}).
+
+    \vspace{0.25cm}
+
+    \item {\color{red} Less interpretable} than decision trees.
+  \end{itemize}
+\end{frame}
+
+
+
+
+
+% Forests and boosting ========================================================
+
+\section{Boosting}
+
+\begin{frame}
+  \frametitle{Gradient Boosted Regression Trees \citep{friedman:2001}}
+
+  \begin{itemize}
+  \item GBRT fits an additive model of the form
+  $$\varphi(x) =  \sum_{m=1}^M \gamma_m h_m(x)$$
+
+  \item The ensemble is built in a forward stagewise manner.
+        That is
+            $$\varphi_m(x) = \varphi_{m-1}(x) + \gamma_m h_m(x)$$
+        where $h_m : {\cal X} \mapsto \mathbb{R}$ is a regression tree {\it approximating}
+        the gradient step $\Delta_{\varphi} L(Y, \varphi_{m-1}(X))$.
+  \end{itemize}
+
+    \begin{figure}
+       \centering
+       \includegraphics[width=\textwidth]{./figures/residual_fitting_2.pdf}
+    \end{figure}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Careful tuning required}
+
+{\scriptsize
+\begin{pythoncode}
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.cross_validation import ShuffleSplit
+from sklearn.grid_search import GridSearchCV
+
+# Careful tuning is required to obtained good results
+param_grid = {"loss": ["mse", "lad", "huber"],
+              "learning_rate": [0.1, 0.01, 0.001],
+              "max_depth": [3, 5, 7],
+              "min_samples_leaf": [1, 3, 5],
+              "subsample": [1.0, 0.9, 0.8]}
+
+est = GradientBoostingRegressor(n_estimators=1000)
+grid = GridSearchCV(est, param_grid,
+                    cv=ShuffleSplit(n=len(X), n_iter=10, test_size=0.25),
+                    scoring="mean_squared_error",
+                    n_jobs=-1).fit(X, y)
+
+gbrt = grid.best_estimator_
+\end{pythoncode}
+}
+
+\begin{center}
+See our PyData 2014 tutorial for further guidance
+\url{https://github.com/pprett/pydata-gbrt-tutorial}
+\end{center}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Partial dependence plots}
+
+Relation between the response $Y$ and a subset of features, marginalized over all other features.
+
+\vspace{0.25cm}
+
+{\scriptsize
+\begin{pythoncode}
+from sklearn.ensemble.partial_dependence import plot_partial_dependence
+plot_partial_dependence(gbrt, X,
+                        features=[1, 10], feature_names=feature_names)
+\end{pythoncode}
+}
+
+    \begin{figure}
+       \centering
+       \includegraphics[width=0.9\textwidth]{./figures/dependence.png}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Strengths and weaknesses of GBRT}
+
+  \begin{itemize}
+        \item Often {\color{blue} more accurate} than random forests.
+
+         \vspace{0.25cm}
+
+        \item {\color{blue} Flexible framework}, that can adapt to arbitrary
+              loss functions.
+
+        \vspace{0.25cm}
+
+        \item Fine control of under/overfitting through {\color{blue}
+              regularization} (e.g., learning rate, subsampling,
+              tree structure, penalization term in the loss function, etc).
+
+        \vspace{0.25cm}
+
+        \item {\color{red} Careful tuning} required.
+
+        \vspace{0.25cm}
+
+        \item {\color{red} Slow} to train, {\color{blue} fast} to predict.
+  \end{itemize}
+\end{frame}
+
+
+% Gaussian Processes ===========================================================
+
+\section{Gaussian Processes}
+
+
+
+% Neural networks ---===========================================================
+
+\section{Neural networks}
+
+
+
+
+
+
+
+\begin{frame}[plain,noframenumbering]
+    \frametitle{References}
+    {\footnotesize
+    \bibliographystyle{apalike}
+    \bibliography{biblio}}
+\end{frame}
+
+\end{document}
