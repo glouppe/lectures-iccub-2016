@@ -311,6 +311,42 @@ export_graphviz(estimator, out_file="tree.dot",
 
 \section{Forests of randomized trees}
 
+\begin{frame}{Bias-variance decomposition in regression}
+
+{\bf Theorem.} For the {\it squared error loss}, the bias-variance decomposition of the expected
+generalization error at $X=\mathbf{x}$ is
+\begin{equation*}
+\mathbb{E}_{\cal L} \{ Err(\varphi_{\cal L}(\mathbf{x})) \} = \text{noise}(\mathbf{x}) + \text{bias}^2(\mathbf{x}) + \text{var}(\mathbf{x})
+\end{equation*}
+where
+\begin{align*}
+\text{noise}(\mathbf{x}) &= Err(\varphi_B(\mathbf{x})), \\
+\text{bias}^2(\mathbf{x}) &= (\varphi_B(\mathbf{x}) - \mathbb{E}_{\cal L} \{ \varphi_{\cal L}(\mathbf{x}) \} )^2, \\
+\text{var}(\mathbf{x}) &= \mathbb{E}_{\cal L} \{ (\mathbb{E}_{\cal L} \{ \varphi_{\cal L}(\mathbf{x}) \} - \varphi_{\cal L}(\mathbf{x}))^2 \}.
+\end{align*}
+
+\end{frame}
+
+\begin{frame}{Bias-variance decomposition}
+\begin{figure}
+\includegraphics[scale=0.7]{./figures/bias-variance-darts.jpg}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Diagnosing the generalization error of a decision tree}
+
+\begin{itemize}
+\item (Residual error: Lowest achievable error, independent of $\varphi_{\cal L}$.)
+\item Bias: Decision trees usually have {\color{blue} low bias}.
+\item Variance: They often suffer from {\color{red} high variance}.
+\end{itemize}
+
+\begin{itemize}
+\item Solution: {\it Combine the predictions of several randomized trees into a single model.}
+\end{itemize}
+
+\end{frame}
+
 \begin{frame}
     \frametitle{Random Forests \citep{breiman:2001,geurts:2006}}
 
@@ -331,11 +367,6 @@ export_graphviz(estimator, out_file="tree.dot",
     \end{tabular}}
 \end{frame}
 
-\begin{frame}{Bias and variance}
-    \begin{figure}
-        \includegraphics[scale=0.7]{./figures/bias-variance-darts.jpg}
-    \end{figure}
-\end{frame}
 
 \begin{frame}{Bias-variance decomposition}
 
@@ -355,6 +386,28 @@ where
 
 and where $\rho(\mathbf{x})$ is the Pearson correlation coefficient between
 the predictions of two randomized trees built on the same learning set.
+
+\end{frame}
+
+\begin{frame}{Interpretation of $\rho(\mathbf{x})$ {\scriptsize (Louppe, 2014)}}
+
+{\bf Theorem.} $\rho(\mathbf{x}) = \frac{\mathbb{V}_{\cal L} \{ \mathbb{E}_{\theta|{\cal L}} \{ \varphi_{{\cal L},\theta}(\mathbf{x}) \} \}}{\mathbb{V}_{\cal L} \{ \mathbb{E}_{\theta|{\cal L}} \{ \varphi_{{\cal L},\theta}(\mathbf{x}) \} \} + \mathbb{E}_{\cal L} \{ \mathbb{V}_{\theta|{\cal L}} \{ \varphi_{{\cal L},\theta}(\mathbf{x}) \} \}}$
+
+\vspace{1cm}
+
+In other words, it is the ratio between
+\begin{itemize}
+\item the variance due to the learning set and
+\item the total variance, accounting for random effects due to both the
+  learning set and the random perburbations.
+\end{itemize}
+
+\bigskip
+
+$\rho(\mathbf{x}) \to 1$ when variance is mostly due to the learning set; \\
+$\rho(\mathbf{x}) \to 0$ when variance is mostly due to the random perturbations;\\
+$\rho(\mathbf{x}) \geq 0$.
+
 
 \end{frame}
 
@@ -424,49 +477,7 @@ plt.plot(param_range, test_scores_mean, label="ETs", color="r")
 \end{frame}
 
 
-\begin{frame}[fragile]
-  \frametitle{Variable importances}
 
-{\scriptsize
-\begin{pythoncode}
-# Variable importances with Random Forest, default parameters
-forest = RandomForestRegressor(n_estimators=10000, n_jobs=-1).fit(X, y)
-forest.feature_importances_
-\end{pythoncode}
-}
-
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{Variable selection/ranking/exploration}
-
-  Tree-based models come with built-in methods for variable selection, ranking
-  or exploration.
-
-  \vspace{0.5cm}
-
-  The main goals are:
-  \begin{itemize}
-  \item To reduce training times;
-  \item To enhance generalisation by reducing overfitting;
-  \item To uncover relations between variables and ease model interpretation.
-  \end{itemize}
-
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{Variable importances}
-
-\begin{figure}
-\includegraphics[width=0.95\textwidth]{./figures/importances.png}
-\end{figure}
-
-\begin{center}
-Importances are measured only through the eyes of the model.
-{\color{red}They may not tell the entire nor the same story!} \citep{louppe:2013}
-\end{center}
-
-\end{frame}
 
 \begin{frame}
   \frametitle{Strengths and weaknesses of forests}
@@ -507,55 +518,301 @@ Importances are measured only through the eyes of the model.
 \section{Boosting}
 
 \begin{frame}
-  \frametitle{Gradient Boosted Regression Trees \citep{friedman:2001}}
+  \frametitle{AdaBoost \citep{freund1995desicion}}
+
+  Can we build a strong learner from multiple weak learners?
 
   \begin{itemize}
-  \item GBRT fits an additive model of the form
-  $$\varphi(x) =  \sum_{m=1}^M \gamma_m h_m(x)$$
-
-  \item The ensemble is built in a forward stagewise manner.
-        That is
-            $$\varphi_m(x) = \varphi_{m-1}(x) + \gamma_m h_m(x)$$
-        where $h_m : {\cal X} \mapsto \mathbb{R}$ is a regression tree {\it approximating}
-        the gradient step $\Delta_{\varphi} L(Y, \varphi_{m-1}(X))$.
+     \item Ensemble: each member is an expert on the errors of its predecessor;
+     \item Iteratively re-weights training examples based on errors.
   \end{itemize}
 
-    \begin{figure}
-       \centering
-       \includegraphics[width=\textwidth]{./figures/residual_fitting_2.pdf}
-    \end{figure}
+
+  \begin{figure}
+    \includegraphics[width=\textwidth,trim=0 0 0 10, clip=true]{figures/adaboost.pdf}
+  \end{figure}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{AdaBoost \citep{freund1995desicion}}
+
+  \begin{center}
+      {\Huge Huge success}
+  \end{center}
+
+  \begin{itemize}
+     \item Viola-Jones Face Detector (2001)
+     \begin{figure}
+        \includegraphics[scale=0.3]{figures/viola-jones.png}
+      \end{figure}
+     \item Freund \& Schapire won the Gödel prize (2003)
+  \end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Gradient Boosted Machines \citep{friedman:2001}}
+
+  Statistical view of boosting:
+
+  \begin{itemize}
+      \item Ultimately, we are interested in finding
+      $$f^* = \arg \min_f \mathbb{E}_{X,Y} [L(Y,f(X))]$$
+      for an arbitrary loss $L$;
+      \item Under the boosting assumption that $f^*$ can be expressed as an additive model $\hat{f}$ of the form
+      $$\hat{f} =  c + \sum_{m=1}^M \rho_m h_m.$$
+  \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Greedy approximation}
+
+  \begin{itemize}
+      \item The ensemble is built in a forward stagewise fashion:
+      $$f_m = f_{m-1} + \rho_m h_m$$
+      \item In accordance with the empirical risk minimization principle,
+      the weak learner $\rho_m h_m$ is chosen to minimize the
+      loss $L$ on the training set, given the current model $f_{m-1}$:
+      \begin{align*}
+          f_m & = f_{m-1} + \arg \min_{\rho,h} \sum_{i=1}^N L(y_i, f_{m-1}(x_i) + \rho h(x_i)) \\
+          f_0 &= \arg \min_c\sum_{i=1}^N L(y_i, c)
+      \end{align*}
+      \item Solving for $\rho, h$ at each step for an arbitrary loss $L$
+      and/or abitrary family ${\cal H}$  is a difficult optimization problem.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Steepest descent in function space}
+
+ \begin{columns}
+     \begin{column}{.75\textwidth}
+
+         Solution: approximate using steepest descent in function space, by
+             choosing a function $h$ that is the most parallel to the negative gradient
+             $\{ g_m(x_i) \}_{i=1}^N$ on the training data:
+             \begin{align*}
+                 g_m(x) &= \mathbb{E}_{Y|X=x} \left[ \frac{\partial L(Y,f(x))}{\partial f(x)} \right]_{f(x) = f_{m-1}(x)} \\
+                 h_m &= \arg \min_h \sum_{i=1}^N (-g_m(x_i) - h(x_i))^2 \\
+                 \rho_m &= \arg \min_\gamma L(y_i, f_{m-1}(x_i) + \rho h_m(x_i))
+             \end{align*}
+             where the second equation is solved using a standard regression algorithm (e.g. decision trees)
+             and the third using line search.
+
+     \end{column}
+     \begin{column}{.25\textwidth}
+         \begin{figure}
+            \centering
+            \includegraphics[width=2.\textwidth]{figures/steepest.png}
+         \end{figure}
+     \end{column}
+ \end{columns}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{In short}
+    \begin{itemize}
+    \item GBM fits an additive model of the form
+    $\hat{f} =  c + \sum_{m=1}^M \rho_m h_m.$
+
+    \item Where $h_m$ are regression trees approximating
+          the negative gradient step
+          $-\left[ \frac{\partial L(Y,f(x))}{\partial f(x)} \right]_{f(x) = f_{m-1}(x)}$.
+
+    \item For $L(Y,f(X)) = (Y-f(X))^2$, regression trees $h_m$ approximate the residuals $y_i -f_{m-1}(x_i)$.
+    \end{itemize}
+
+  \begin{figure}
+     \centering
+     \includegraphics[width=\textwidth]{./figures/residual_fitting_2.pdf}
+  \end{figure}
+\end{frame}
+
+\begin{frame}[fragile]{Example}
+
+    \begin{minted}[fontsize=\small]{python}
+from sklearn.ensemble import GradientBoostingRegressor
+est = GradientBoostingRegressor(n_estimators=100).fit(X, y)
+    \end{minted}
+
+   \begin{figure}
+     \centering
+       \includegraphics[width=0.8\textwidth]{figures/func_approx3.pdf}
+   \end{figure}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Model complexity and overfitting}
+
+   \begin{figure}
+     \centering
+       \includegraphics[width=0.5\textwidth]{figures/overfitting.pdf}
+   \end{figure}
+
+   % Overlay: GBRT provides a number of means to control overfitting
+
+     GBM provides a number of knobs to control overfitting:
+     \begin{itemize}
+       \item Shrinkage
+       \item Tree structure
+       \item Stochastic Gradient Boosting
+     \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Regularization: shrinkage}
+
+    \begin{itemize}
+      \item Slow learning by shrinking tree predictions with $0 < \text{learning\_rate} <= 1$
+      \item Lower \texttt{learning\_rate} requires higher \texttt{n\_estimators}
+    \end{itemize}
+
+   \begin{figure}
+     \centering
+       \includegraphics[width=0.75\textwidth]{figures/regularization-learning-rate.pdf}
+   \end{figure}
+
+\end{frame}
+
+
+\begin{frame}{Regularization: tree structure}
+
+    \begin{itemize}
+      \item The \texttt{max\_depth} of the trees controls the degree of features interactions
+      \item Use \texttt{min\_samples\_leaf} to have a sufficient nr. of samples per leaf.
+    \end{itemize}
+
+   \begin{figure}
+     \centering
+       \includegraphics[width=0.75\textwidth]{figures/regularization-tree-structure.pdf}
+   \end{figure}
+
+\end{frame}
+
+
+
+\begin{frame}{Regularization: stochastic gradient boosting}
+
+    \begin{itemize}
+      \item Samples: random subset of the training set (\texttt{subsample})
+      \item Features: random subset of features (\texttt{max\_features})
+      \item Improved accuracy -- reduced runtime
+    \end{itemize}
+
+   \begin{figure}
+     \centering
+       \includegraphics[width=0.75\textwidth]{figures/regularization-subsampling.pdf}
+   \end{figure}
+
+\end{frame}
+
+\begin{frame}[fragile]{Hyperparameter tuning}
+
+\begin{enumerate}
+  \item Set \texttt{n\_estimators} as high as possible (eg. $3000$)
+  \vspace{0.2cm}
+  \item Tune hyperparameters via grid search.
+  %\vspace{0.3cm}
+
+\begin{minted}[fontsize=\footnotesize]{python}
+from sklearn.grid_search import GridSearchCV
+param_grid = {'learning_rate': [0.1, 0.05, 0.02, 0.01],
+              'max_depth': [4, 6],
+              'min_samples_leaf': [3, 5, 9, 17],
+              'max_features': [1.0, 0.3, 0.1]}
+est = GradientBoostingRegressor(n_estimators=3000)
+gs_cv = GridSearchCV(est, param_grid).fit(X, y)
+# best hyperparameter setting
+gs_cv.best_params_
+\end{minted}
+  \vspace{0.2cm}
+  \item Finally, set \texttt{n\_estimators} even higher and tune \texttt{learning\_rate}.
+
+\end{enumerate}
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Strengths and weaknesses of Boosting}
+
+  \begin{itemize}
+        \item Often {\color{blue} more accurate} than random forests.
+
+         \vspace{0.25cm}
+
+        \item {\color{blue} Flexible framework}, that can adapt to arbitrary
+              loss functions.
+
+        \vspace{0.25cm}
+
+        \item Fine control of under/overfitting through {\color{blue}
+              regularization} (e.g., learning rate, subsampling,
+              tree structure, penalization term in the loss function, etc).
+
+        \vspace{0.25cm}
+
+        \item {\color{red} Careful tuning} required.
+
+        \vspace{0.25cm}
+
+        \item {\color{red} Slow} to train, {\color{blue} fast} to predict.
+  \end{itemize}
+\end{frame}
+
+
+% Interpretation ===============================================================
+
+\section{Interpreting tree-based models}
+
+\begin{frame}[fragile]
+  \frametitle{Variable selection/ranking/exploration}
+
+  Tree-based models come with built-in methods for variable selection, ranking
+  or exploration.
+
+  \vspace{0.5cm}
+
+  The main goals are:
+  \begin{itemize}
+  \item To reduce training times;
+  \item To enhance generalisation by reducing overfitting;
+  \item To uncover relations between variables and ease model interpretation.
+  \end{itemize}
 
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Careful tuning required}
+  \frametitle{Variable importances}
 
 {\scriptsize
 \begin{pythoncode}
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.cross_validation import ShuffleSplit
-from sklearn.grid_search import GridSearchCV
-
-# Careful tuning is required to obtained good results
-param_grid = {"loss": ["mse", "lad", "huber"],
-              "learning_rate": [0.1, 0.01, 0.001],
-              "max_depth": [3, 5, 7],
-              "min_samples_leaf": [1, 3, 5],
-              "subsample": [1.0, 0.9, 0.8]}
-
-est = GradientBoostingRegressor(n_estimators=1000)
-grid = GridSearchCV(est, param_grid,
-                    cv=ShuffleSplit(n=len(X), n_iter=10, test_size=0.25),
-                    scoring="mean_squared_error",
-                    n_jobs=-1).fit(X, y)
-
-gbrt = grid.best_estimator_
+# Variable importances with Random Forest, default parameters
+forest = RandomForestRegressor(n_estimators=10000, n_jobs=-1).fit(X, y)
+forest.feature_importances_
 \end{pythoncode}
 }
 
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Variable importances}
+
+\begin{figure}
+\includegraphics[width=0.95\textwidth]{./figures/importances.png}
+\end{figure}
+
 \begin{center}
-See our PyData 2014 tutorial for further guidance
-\url{https://github.com/pprett/pydata-gbrt-tutorial}
+Importances are measured only through the eyes of the model.
+{\color{red}They may not tell the entire nor the same story!} \citep{louppe:2013}
 \end{center}
 
 \end{frame}
@@ -581,32 +838,6 @@ plot_partial_dependence(gbrt, X,
     \end{figure}
 \end{frame}
 
-\begin{frame}
-  \frametitle{Strengths and weaknesses of GBRT}
-
-  \begin{itemize}
-        \item Often {\color{blue} more accurate} than random forests.
-
-         \vspace{0.25cm}
-
-        \item {\color{blue} Flexible framework}, that can adapt to arbitrary
-              loss functions.
-
-        \vspace{0.25cm}
-
-        \item Fine control of under/overfitting through {\color{blue}
-              regularization} (e.g., learning rate, subsampling,
-              tree structure, penalization term in the loss function, etc).
-
-        \vspace{0.25cm}
-
-        \item {\color{red} Careful tuning} required.
-
-        \vspace{0.25cm}
-
-        \item {\color{red} Slow} to train, {\color{blue} fast} to predict.
-  \end{itemize}
-\end{frame}
 
 
 % Gaussian Processes ===========================================================
