@@ -1,0 +1,93 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{etex}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{verbatim}
+\usepackage{url}
+\usepackage{moreverb}
+\usepackage{fancyvrb}
+\usepackage{natbib}
+\usepackage{eulervm}
+\usepackage{auto-pst-pdf}
+\usepackage{pst-plot}
+\usepackage{amssymb}
+\usepackage{pifont}
+\usepackage{algpseudocode}
+\usepackage{multirow}
+
+% Code snippets
+\usepackage{minted}
+\definecolor{rulecolor}{rgb}{0.80,0.80,0.80}
+\definecolor{bgcolor}{rgb}{1.0,1.0,1.0}
+\newminted{python}{bgcolor=bgcolor}
+
+% Checked marks
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+% Colors
+\newrgbcolor{mygreen}{.00 .5 .00}
+\newcommand{\X}[1]{\textcolor{blue}{#1}}
+\newcommand{\y}[1]{\textcolor{red}{#1}}
+\newcommand{\model}[1]{\textcolor{mygreen}{#1}}
+\newcommand{\loss}[1]{\textcolor{lightblue}{#1}}
+
+% Beamer layout
+\hypersetup{colorlinks=true, linkcolor=black, urlcolor=blue}
+\usetheme{boxes}
+\beamertemplatenavigationsymbolsempty
+\setbeamertemplate{sections/subsections in toc}[circle]
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{itemize subitem}[square]
+
+% Front slide
+\title{{\bf Supervised Learning}\\
+Gaussian processes}
+\author{
+Gilles Louppe (\href{https://twitter.com/glouppe}{@glouppe})
+}
+\date{October 17, 2016}
+
+% Argmax
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\begin{document}
+
+\begin{frame}[plain]
+\titlepage
+\end{frame}
+
+
+\AtBeginSection[]
+{
+\begin{frame}[noframenumbering, plain]
+  \frametitle{Outline}
+  \tableofcontents[currentsection]
+  % Die Option [pausesections]
+\end{frame}
+}
+
+
+
+% Gaussian Processes ===========================================================
+
+\section{XXX}
+
+
+
+
+
+
+\begin{frame}[plain,noframenumbering]
+    \frametitle{References}
+    {\footnotesize
+    \bibliographystyle{apalike}
+    \bibliography{biblio}}
+\end{frame}
+
+\end{document}
