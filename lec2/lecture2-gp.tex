@@ -81,7 +81,7 @@ Gilles Louppe (\href{https://twitter.com/glouppe}{@glouppe})
         \item Training data ${\cal L} = \{\mathbf{x}_i, f_i\}_{i=1}^N$
         \item $\mathbf{x}_i \in \mathbb{R}^d$
         \item $y_i = f(\mathbf{x}_i)$ for some unknown $f$
-        \item We wish to recover the underlying process $f$ from the observed data, i.e infer $f^*$ for some unseen $\mathbf{x}^*$, using $p(f^*|\mathbf{x}^*, {\cal L})$.
+        \item We wish to recover the underlying process $f$ from the observed data, i.e infer $f$ for some unseen $\mathbf{x}$, using $p(f|{\cal L})$.
     \end{itemize}
 \end{frame}
 
@@ -179,11 +179,11 @@ Gilles Louppe (\href{https://twitter.com/glouppe}{@glouppe})
         \end{column}
         \begin{column}{0.5\textwidth}
             {\bf Gaussian process}
-            $$f \sim {\cal GP}(\mu(\cdot), K(\cdot,\cdot))$$
+            $$f \sim {\cal GP}(m(\cdot), k(\cdot,\cdot))$$
 
             \begin{itemize}
                 \item Distribution over functions.
-                \item Fully specified by a mean {\it function} and a covariance {\it function}.
+                \item Fully specified by a mean {\it function} $m$ and a covariance {\it function} $k$.
                 \item The argument of the random function plays the role of the index.
             \end{itemize}
 
@@ -194,50 +194,50 @@ Gilles Louppe (\href{https://twitter.com/glouppe}{@glouppe})
 
 
 \begin{frame}
-    \frametitle{Specifying a gaussian process}
+    \frametitle{Gaussian process prior}
 
-    \begin{itemize}
-        \item \textbf{Mean function} $\mu(\cdot)$: Usually defined to be zero.
+    For $m(\cdot)=0$ and for any set  $A = \mathbf{x}_1, \dots,
+    \mathbf{x}_M$ of test points, we may compute the covariance matrix $K_{AA}$, which defines a joint distribution $p(\mathbf{f}_A)$
+    over function values at those points:
+    $$\begin{bmatrix} f(\mathbf{x}_1)\\
+                      \dots \\
+                      f(\mathbf{x}_M) \end{bmatrix} \sim {\cal N}(\mathbf{0}, K_{AA})$$
 
-        \vspace{1cm}
+    That is, we are marginalizing over the random variables not including in the test points.
 
-        \item \textbf{Covariance function} $K(\cdot, \cdot)$: This defines the prior properties of the functions considered for inference:
-        \begin{itemize}
-            \item Stationarity
-            \item Smoothness
-            \item Length scales
-            \item ...
-        \end{itemize}
-    \end{itemize}
 \end{frame}
-
 
 \begin{frame}
     \frametitle{Gaussian process prior}
 
-    Assuming the zero mean function, for any set of inputs $\mathbf{x}_1, \dots,
-    \mathbf{x}_N$, we may compute the covariance matrix $K$ such that
-    $K_{ij} = K(\mathbf{x}_i, \mathbf{x}_j)$, which defines a joint distribution
-    over function values at those points:
+    \begin{figure}
+    \includegraphics[width=0.8\textwidth]{./figures/gp-prior.pdf}
+    \end{figure}
 
+\end{frame}
 
-    \begin{columns}
-        \begin{column}{0.5\textwidth}
+\begin{frame}
+    \frametitle{Gaussian process posterior}
 
-            $$\begin{bmatrix} f(\mathbf{x}_1)\\
-                              \dots \\
-                              f(\mathbf{x}_N) \end{bmatrix} \sim {\cal N}(\mathbf{0}, K)$$
+    Given training data ${\cal L} = (B = \mathbf{x}_1, \dots, \mathbf{x}_N; \mathbf{f}_B = f(\mathbf{x_1}), \dots, f(\mathbf{x_N} ))$
+    and test points $A = \mathbf{x}_1, \dots,
+    \mathbf{x}_M$, we may similarly derive the joint distribution
+    $$\begin{bmatrix}\mathbf{f}_A\\
+                     \mathbf{f}_B\end{bmatrix} \sim {\cal N}(\mathbf{0}, \begin{bmatrix}K_{AA} & K_{AB} \\
+                                                                                        K_{BA} & K_{BB}\end{bmatrix})$$
+    on which we can condition $\mathbf{f}_B$ on the known values from ${\cal L}$,
+    resulting in the posterior distribution $p(\mathbf{f}_A|{\cal L})$:
 
-        \end{column}
-        \begin{column}{0.5\textwidth}
-            \begin{figure}
-            \includegraphics[width=\textwidth]{./figures/gp-prior.pdf}
-            \end{figure}
-        \end{column}
-    \end{columns}
+    $$\mathbf{f}_A \sim {\cal N}(K_{AB}K_{BB}^{-1}{\mathbf{f}_B}, K_{AA} - K_{AB}K_{BB}^{-1}K_{BA})$$
 
+\end{frame}
 
+\begin{frame}
+    \frametitle{Gaussian process posterior}
 
+    \begin{figure}
+    \includegraphics[width=0.8\textwidth]{./figures/gp-posterior.pdf}
+    \end{figure}
 
 \end{frame}
 
