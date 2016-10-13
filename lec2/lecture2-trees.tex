@@ -78,6 +78,18 @@ Gilles Louppe (\href{https://twitter.com/glouppe}{@glouppe})
 \section{Decision trees}
 
 \begin{frame}
+    \frametitle{Problem statement}
+
+    \begin{figure}
+    \centering
+    \includegraphics[width=0.45\textwidth]{./figures/classification.pdf}
+    \includegraphics[width=0.45\textwidth]{./figures/regression.pdf}\\
+    Classification vs. regression
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}
     \frametitle{Running example}
 
     \begin{columns}
@@ -317,13 +329,13 @@ export_graphviz(estimator, out_file="tree.dot",
 {\bf Theorem.} For the {\it squared error loss}, the bias-variance decomposition of the expected
 generalization error at $X=\mathbf{x}$ is
 \begin{equation*}
-\mathbb{E}_{\cal L} \{ Err(\varphi_{\cal L}(\mathbf{x})) \} = \text{noise}(\mathbf{x}) + \text{bias}^2(\mathbf{x}) + \text{var}(\mathbf{x})
+\mathbb{E}_{\cal L} \{ Err(f_{\cal L}(\mathbf{x})) \} = \text{noise}(\mathbf{x}) + \text{bias}^2(\mathbf{x}) + \text{var}(\mathbf{x})
 \end{equation*}
 where
 \begin{align*}
-\text{noise}(\mathbf{x}) &= Err(\varphi_B(\mathbf{x})), \\
-\text{bias}^2(\mathbf{x}) &= (\varphi_B(\mathbf{x}) - \mathbb{E}_{\cal L} \{ \varphi_{\cal L}(\mathbf{x}) \} )^2, \\
-\text{var}(\mathbf{x}) &= \mathbb{E}_{\cal L} \{ (\mathbb{E}_{\cal L} \{ \varphi_{\cal L}(\mathbf{x}) \} - \varphi_{\cal L}(\mathbf{x}))^2 \}.
+\text{noise}(\mathbf{x}) &= Err(f_B(\mathbf{x})), \\
+\text{bias}^2(\mathbf{x}) &= (f_B(\mathbf{x}) - \mathbb{E}_{\cal L} \{ f_{\cal L}(\mathbf{x}) \} )^2, \\
+\text{var}(\mathbf{x}) &= \mathbb{E}_{\cal L} \{ (\mathbb{E}_{\cal L} \{ f_{\cal L}(\mathbf{x}) \} - f_{\cal L}(\mathbf{x}))^2 \}.
 \end{align*}
 
 \end{frame}
@@ -337,7 +349,7 @@ where
 \begin{frame}{Diagnosing the generalization error of a decision tree}
 
 \begin{itemize}
-\item (Residual error: Lowest achievable error, independent of $\varphi_{\cal L}$.)
+\item (Residual error: Lowest achievable error, independent of $f_{\cal L}$.)
 \item Bias: Decision trees usually have {\color{blue} low bias}.
 \item Variance: They often suffer from {\color{red} high variance}.
 \end{itemize}
@@ -374,14 +386,14 @@ where
 {\bf Theorem.}
 For the squared error loss, the bias-variance decomposition of the expected
 generalization error $\mathbb{E}_{\cal L} \{ Err( \psi_{{\cal L},\theta_1,\dots,\theta_M}(\mathbf{x}))
-\}$ at $X=\mathbf{x}$ of an ensemble of $M$ randomized models $\varphi_{{\cal L},\theta_m}$ is
+\}$ at $X=\mathbf{x}$ of an ensemble of $M$ randomized models $f_{{\cal L},\theta_m}$ is
 \begin{equation*}
 \mathbb{E}_{\cal L} \{ Err(\psi_{{\cal L},\theta_1,\dots,\theta_M}(\mathbf{x})) \} = \text{noise}(\mathbf{x}) + \text{bias}^2(\mathbf{x}) + \text{var}(\mathbf{x}),
 \end{equation*}
 where
 \begin{align*}
-\text{noise}(\mathbf{x}) &= Err(\varphi_B(\mathbf{x})), \\
-\text{bias}^2(\mathbf{x}) &= (\varphi_B(\mathbf{x}) - \mathbb{E}_{{\cal L},\theta} \{ \varphi_{{\cal L},\theta}(\mathbf{x}) \} )^2, \\
+\text{noise}(\mathbf{x}) &= Err(f_B(\mathbf{x})), \\
+\text{bias}^2(\mathbf{x}) &= (f_B(\mathbf{x}) - \mathbb{E}_{{\cal L},\theta} \{ f_{{\cal L},\theta}(\mathbf{x}) \} )^2, \\
 \text{var}(\mathbf{x}) &= \rho(\mathbf{x}) \sigma^2_{{\cal L},\theta}(\mathbf{x}) + \frac{1 - \rho(\mathbf{x})}{M} \sigma^2_{{\cal L},\theta}(\mathbf{x}).
 \end{align*}
 
@@ -392,7 +404,7 @@ the predictions of two randomized trees built on the same learning set.
 
 \begin{frame}{Interpretation of $\rho(\mathbf{x})$ {\scriptsize (Louppe, 2014)}}
 
-{\bf Theorem.} $\rho(\mathbf{x}) = \frac{\mathbb{V}_{\cal L} \{ \mathbb{E}_{\theta|{\cal L}} \{ \varphi_{{\cal L},\theta}(\mathbf{x}) \} \}}{\mathbb{V}_{\cal L} \{ \mathbb{E}_{\theta|{\cal L}} \{ \varphi_{{\cal L},\theta}(\mathbf{x}) \} \} + \mathbb{E}_{\cal L} \{ \mathbb{V}_{\theta|{\cal L}} \{ \varphi_{{\cal L},\theta}(\mathbf{x}) \} \}}$
+{\bf Theorem.} $\rho(\mathbf{x}) = \frac{\mathbb{V}_{\cal L} \{ \mathbb{E}_{\theta|{\cal L}} \{ f_{{\cal L},\theta}(\mathbf{x}) \} \}}{\mathbb{V}_{\cal L} \{ \mathbb{E}_{\theta|{\cal L}} \{ f_{{\cal L},\theta}(\mathbf{x}) \} \} + \mathbb{E}_{\cal L} \{ \mathbb{V}_{\theta|{\cal L}} \{ f_{{\cal L},\theta}(\mathbf{x}) \} \}}$
 
 \vspace{1cm}
 

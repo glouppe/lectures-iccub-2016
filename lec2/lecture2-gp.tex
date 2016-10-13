@@ -47,7 +47,7 @@
 
 % Front slide
 \title{{\bf Supervised Learning}\\
-Gaussian processes}
+Gaussian processes for regression}
 \author{
 Gilles Louppe (\href{https://twitter.com/glouppe}{@glouppe})
 }
@@ -63,24 +63,183 @@ Gilles Louppe (\href{https://twitter.com/glouppe}{@glouppe})
 \end{frame}
 
 
-\AtBeginSection[]
-{
-\begin{frame}[noframenumbering, plain]
-  \frametitle{Outline}
-  \tableofcontents[currentsection]
-  % Die Option [pausesections]
+\begin{frame}
+    \frametitle{Problem statement}
+
+    \begin{figure}
+    \centering
+    \includegraphics[width=0.65\textwidth]{./figures/regression-bars.pdf}\\
+    Regression, with error bars
+    \end{figure}
 \end{frame}
-}
+
+
+\begin{frame}
+    \frametitle{Problem statement}
+
+    \begin{itemize}
+        \item Training data ${\cal L} = \{\mathbf{x}_i, f_i\}_{i=1}^N$
+        \item $\mathbf{x}_i \in \mathbb{R}^d$
+        \item $y_i = f(\mathbf{x}_i)$ for some unknown $f$
+        \item We wish to recover the underlying process $f$ from the observed data, i.e infer $f^*$ for some unseen $\mathbf{x}^*$, using $p(f^*|\mathbf{x}^*, {\cal L})$.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{The multivariate gaussian distribution}
+
+    \begin{columns}
+        \begin{column}{0.6\textwidth}
+
+        Let assume a random variable $\mathbf{f}$ following a multivariate
+        Gaussian distribution, and let partition its dimensions into two
+        sets $A$ and $B$:
+
+        \begin{align*}
+            &\underbrace{f_1, \dots, f_i}_{\mathbf{f}_A},\underbrace{f_{i+1}, \dots, f_N}_{\mathbf{f}_B}  \sim {\cal N}(\mu, K) \\
+            &\mu = \begin{bmatrix}\mu_A\\
+                                  \mu_B\end{bmatrix} \in \mathbb{R}^N\\
+            &K = \begin{bmatrix}K_{AA} & K_{AB} \\
+                                K_{BA} & K_{BB}\end{bmatrix} \in \mathbb{R}^{N \times N}
+        \end{align*}
+
+        \end{column}
+        \begin{column}{0.4\textwidth}
+            \begin{figure}
+            \includegraphics[width=\textwidth]{./figures/mg.png}
+            \end{figure}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Marginal and conditional distributions}
+
+    \begin{figure}
+    \includegraphics[width=0.4\textwidth]{./figures/mg.png}
+    \end{figure}
+
+        \begin{itemize}
+            \item The {\it marginal} distribution of a multivariate gaussian is a multivariate gaussian:
+            \begin{align*}
+                &{\mathbf{f}_A}  \sim {\cal N}(\mu_A, K_{AA})
+            \end{align*}
+
+            \item The {\it conditional} distribution of a multivariate gaussian is a multivariate gaussian:
+            \begin{align*}
+                &{\mathbf{f}_A}|{\mathbf{f}_B}  \sim {\cal N}(\mu_A + K_{AB}K_{BB}^{-1}({\mathbf{f}_B} - \mu_B), K_{AA} - K_{AB}K_{BB}^{-1}K_{BA})
+            \end{align*}
+        \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Gaussian Processes}
+
+    {\bf Definition.} A {\it Gaussian process} is a (potentially infinite) collection
+    of random variables such that the joint distribution of any finite
+    number them is multivariate Gaussian.
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Gaussian Processes: the simpler explanation}
+
+    \begin{center}
+        A {\it Gaussian process} is a
+
+        \vspace{1cm}
+
+        \resizebox{\linewidth}{!}{HUGE\footnote{The dimension is the number of data points.}}
+
+        \vspace{1cm}
+
+
+        multivariate gaussian distribution.
+    \end{center}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Gaussian distributions vs. Gaussian processes}
+
+    \begin{columns}[t]
+        \begin{column}{0.5\textwidth}
+            {\bf Gaussian distribution}
+            $$x \sim {\cal N}(\mu, K)$$
+
+            \begin{itemize}
+                \item Distribution over vectors.
+                \item Fully specified by a mean and covariance.
+                \item The position of the random variable in the vector plays the role of the index.
+            \end{itemize}
+
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            {\bf Gaussian process}
+            $$f \sim {\cal GP}(\mu(\cdot), K(\cdot,\cdot))$$
+
+            \begin{itemize}
+                \item Distribution over functions.
+                \item Fully specified by a mean {\it function} and a covariance {\it function}.
+                \item The argument of the random function plays the role of the index.
+            \end{itemize}
+
+        \end{column}
+    \end{columns}
+
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Specifying a gaussian process}
+
+    \begin{itemize}
+        \item \textbf{Mean function} $\mu(\cdot)$: Usually defined to be zero.
+
+        \vspace{1cm}
+
+        \item \textbf{Covariance function} $K(\cdot, \cdot)$: This defines the prior properties of the functions considered for inference:
+        \begin{itemize}
+            \item Stationarity
+            \item Smoothness
+            \item Length scales
+            \item ...
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Gaussian process prior}
+
+    Assuming the zero mean function, for any set of inputs $\mathbf{x}_1, \dots,
+    \mathbf{x}_N$, we may compute the covariance matrix $K$ such that
+    $K_{ij} = K(\mathbf{x}_i, \mathbf{x}_j)$, which defines a joint distribution
+    over function values at those points:
+
+
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+
+            $$\begin{bmatrix} f(\mathbf{x}_1)\\
+                              \dots \\
+                              f(\mathbf{x}_N) \end{bmatrix} \sim {\cal N}(\mathbf{0}, K)$$
+
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{figure}
+            \includegraphics[width=\textwidth]{./figures/gp-prior.pdf}
+            \end{figure}
+        \end{column}
+    \end{columns}
 
 
 
-% Gaussian Processes ===========================================================
 
-\section{XXX}
-
-
-
-
+\end{frame}
 
 
 \begin{frame}[plain,noframenumbering]
