@@ -242,11 +242,123 @@ Gilles Louppe (\href{https://twitter.com/glouppe}{@glouppe})
 \end{frame}
 
 
-\begin{frame}[plain,noframenumbering]
-    \frametitle{References}
-    {\footnotesize
-    \bibliographystyle{apalike}
-    \bibliography{biblio}}
+\begin{frame}
+    \frametitle{Covariance functions (or kernels)}
+
+    The covariance function $k(\cdot,\cdot)$ encodes the covariance between pair of random variables $\mathbf{x}_i, \mathbf{x}_j$.
+    It must be positive semi-definite and symmetric.
+
+    \vspace{0.5cm}
+
+    Popular examples include:
+    \begin{itemize}
+        \item The squared exponential function (RBF)
+        \item The Matern kernel
+        \item The linear kernel
+        \item The polynomial kernel
+        \item The white noise kernel
+    \end{itemize}
+
+    \vspace{0.5cm}
+
+    Kernels can be decomposed together to describe complex interactions.
 \end{frame}
+
+
+\begin{frame}
+    \frametitle{Squared exponential function}
+
+    $$k(\mathbf{x}_i, \mathbf{x}_j) = \sigma^2 \exp(-  \frac{||\mathbf{x}_i - \mathbf{x}_j||^2}{2 \ell^2})$$
+
+    Hyper-parameters:
+    \begin{itemize}
+        \item The length scale $\ell$ describes the smoothness of the function.
+        \item The output variance $\sigma^2$ determines the average distance of the function away from its mean.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Squared exponential function ($\ell=0.1$)}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{./figures/rbf-01.pdf}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Squared exponential function ($\ell=0.5$)}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{./figures/rbf-05.pdf}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Squared exponential function ($\ell=1.0$)}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{./figures/rbf-10.pdf}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Hyper-parameters}
+
+    \begin{itemize}
+        \item So far we have assumed that the gaussian process prior $p(\mathbf{f})$
+        was specified a priori.
+
+        \item However, this distribution has itself parameters. E.g., $\ell$ and $\sigma$ when
+        using the squared exponential function.
+
+        \item Let $\theta$ denote the vector of hyper-parameters. How do we learn $\theta$?
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Marginal likelihood}
+
+    Given training data ${\cal L} = (B = \mathbf{x}_1, \dots, \mathbf{x}_N; \mathbf{f}_B = f(\mathbf{x_1}), \dots, f(\mathbf{x_N} ))$,
+    we can derive the prior
+        $$\begin{bmatrix} f(\mathbf{x}_1)\\
+                          \dots \\
+                          f(\mathbf{x}_N) \end{bmatrix} \sim {\cal N}(\mathbf{0}, K_{BB;\theta})$$
+    at the training points.
+
+    Let select $\theta$ to maximize the likelihood $p(\mathbf{f}_B;\theta)$ of the training observations under that prior:
+    \begin{align*}
+        \theta^* &= \arg \min_\theta - \log p(\mathbf{f}_B;\theta) \\
+                 &= \arg \min_\theta - \frac{1}{2} \log \det K_{BB;\theta} - \frac{1}{2} \mathbf{f}_B^T K_{BB;\theta}^{-1} \mathbf{f}_B + c
+    \end{align*}
+
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Squared exponential function ($\ell^*$)}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{./figures/rbf-ml.pdf}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Summary}
+
+    \begin{itemize}
+        \item Gaussians processes $=$ multivariate gaussian in infinite dimension.
+        \item Provide a principled approach to derive a posterior distribution $p(\mathbf{f}|{\cal L})$.
+        \item They are non-parametric, but often require a careful design of the covariance function.
+        \item Gaussian processes extend to classification (not covered)
+    \end{itemize}
+\end{frame}
+
 
 \end{document}
