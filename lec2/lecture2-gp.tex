@@ -80,7 +80,7 @@ Gilles Louppe (\href{https://twitter.com/glouppe}{@glouppe})
     \begin{itemize}
         \item Training data ${\cal L} = \{\mathbf{x}_i, f_i\}_{i=1}^N$
         \item $\mathbf{x}_i \in \mathbb{R}^d$
-        \item $y_i = f(\mathbf{x}_i)$ for some unknown $f$
+        \item $f_i = f(\mathbf{x}_i)$ for some unknown $f$
         \item We wish to recover the underlying process $f$ from the observed data, i.e infer $f$ for some unseen $\mathbf{x}$, using $p(f|{\cal L})$.
     \end{itemize}
 \end{frame}
@@ -339,7 +339,6 @@ Gilles Louppe (\href{https://twitter.com/glouppe}{@glouppe})
 
 \end{frame}
 
-
 \begin{frame}
     \frametitle{Squared exponential function ($\ell^*$)}
 
@@ -348,6 +347,34 @@ Gilles Louppe (\href{https://twitter.com/glouppe}{@glouppe})
         \includegraphics[width=0.8\textwidth]{./figures/rbf-ml.pdf}
     \end{figure}
 \end{frame}
+
+
+\begin{frame}
+    \frametitle{Noisy observations}
+
+    \begin{itemize}
+        \item So far we assumed noise-free observations $\mathbf{f}_B = f(\mathbf{x}_B)$.
+        \item In more realistic situations, it is typical to instead consider noisy observations $\mathbf{y}_B = f(\mathbf{x}_B) + \epsilon$.
+        \item Assuming iid Gaussian noise $\epsilon$ with variance $\sigma^2_N$, the joint distribution of noisy observations of $f$ at training points and of the true values of $f$ at test points is:
+        $$\begin{bmatrix}\mathbf{f}_A\\
+                         \mathbf{y}_B\end{bmatrix} \sim {\cal N}(\mathbf{0}, \begin{bmatrix}K_{AA} & K_{AB} \\
+                                                                                            K_{BA} & K_{BB} + \sigma^2_N I\end{bmatrix}),$$
+        wich results in the posterior
+        $$\mathbf{f}_A \sim {\cal N}(K_{AB}[K_{BB} + \sigma^2_N I]^{-1}{\mathbf{f}_B}, K_{AA} - K_{AB}[K_{BB} + \sigma^2_N I]^{-1}K_{BA}).$$
+    \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Noisy observations ($\ell^*$, $\sigma^2=0.1$)}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{./figures/rbf-noise.pdf}
+    \end{figure}
+\end{frame}
+
 
 \begin{frame}
     \frametitle{Summary}
