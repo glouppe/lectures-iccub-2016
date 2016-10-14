@@ -412,7 +412,7 @@ In other words, it is the ratio between
 \begin{itemize}
 \item the variance due to the learning set and
 \item the total variance, accounting for random effects due to both the
-  learning set and the random perburbations.
+  learning set and the random perturbations.
 \end{itemize}
 
 \bigskip
@@ -586,7 +586,7 @@ plt.plot(param_range, test_scores_mean, label="ETs", color="r")
   \frametitle{Greedy approximation}
 
   \begin{itemize}
-      \item The ensemble is built in a forward stagewise fashion:
+      \item The ensemble is built in a forward stage-wise fashion:
       $$f_m = f_{m-1} + \rho_m h_m$$
       \item In accordance with the empirical risk minimization principle,
       the weak learner $\rho_m h_m$ is chosen to minimize the
@@ -596,7 +596,7 @@ plt.plot(param_range, test_scores_mean, label="ETs", color="r")
           f_0 &= \arg \min_c\sum_{i=1}^N L(y_i, c)
       \end{align*}
       \item Solving for $\rho, h$ at each step for an arbitrary loss $L$
-      and/or abitrary family ${\cal H}$  is a difficult optimization problem.
+      and/or arbitrary family ${\cal H}$  is a difficult optimization problem.
   \end{itemize}
 
 \end{frame}
@@ -663,7 +663,7 @@ est = GradientBoostingRegressor(n_estimators=100).fit(X, y)
 \end{frame}
 
 
-\begin{frame}[fragile]{Model complexity and overfitting}
+\begin{frame}[fragile]{Model complexity and over-fitting}
 
    \begin{figure}
      \centering
@@ -672,7 +672,7 @@ est = GradientBoostingRegressor(n_estimators=100).fit(X, y)
 
    % Overlay: GBRT provides a number of means to control overfitting
 
-     GBM provides a number of knobs to control overfitting:
+     GBM provides a number of knobs to control over-fitting:
      \begin{itemize}
        \item Shrinkage
        \item Tree structure
@@ -717,7 +717,7 @@ est = GradientBoostingRegressor(n_estimators=100).fit(X, y)
     \begin{itemize}
       \item Samples: random subset of the training set (\texttt{subsample})
       \item Features: random subset of features (\texttt{max\_features})
-      \item Improved accuracy -- reduced runtime
+      \item Improved accuracy -- reduced run-time
     \end{itemize}
 
    \begin{figure}
@@ -727,12 +727,12 @@ est = GradientBoostingRegressor(n_estimators=100).fit(X, y)
 
 \end{frame}
 
-\begin{frame}[fragile]{Hyperparameter tuning}
+\begin{frame}[fragile]{Hyper-parameter tuning}
 
 \begin{enumerate}
   \item Set \texttt{n\_estimators} as high as possible (eg. $3000$)
   \vspace{0.2cm}
-  \item Tune hyperparameters via grid search.
+  \item Tune hyper-parameters via grid search.
   %\vspace{0.3cm}
 
 \begin{minted}[fontsize=\footnotesize]{python}
@@ -743,7 +743,7 @@ param_grid = {'learning_rate': [0.1, 0.05, 0.02, 0.01],
               'max_features': [1.0, 0.3, 0.1]}
 est = GradientBoostingRegressor(n_estimators=3000)
 gs_cv = GridSearchCV(est, param_grid).fit(X, y)
-# best hyperparameter setting
+# best hyper-parameter setting
 gs_cv.best_params_
 \end{minted}
   \vspace{0.2cm}
@@ -767,7 +767,7 @@ gs_cv.best_params_
 
         \vspace{0.25cm}
 
-        \item Fine control of under/overfitting through {\color{blue}
+        \item Fine control of under/over-fitting through {\color{blue}
               regularization} (e.g., learning rate, subsampling,
               tree structure, penalization term in the loss function, etc).
 
@@ -797,7 +797,7 @@ gs_cv.best_params_
   The main goals are:
   \begin{itemize}
   \item To reduce training times;
-  \item To enhance generalisation by reducing overfitting;
+  \item To enhance generalization by reducing over-fitting;
   \item To uncover relations between variables and ease model interpretation.
   \end{itemize}
 
