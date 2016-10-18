@@ -11816,10 +11816,10 @@ div#notebook {
 
 
 
-<div id="cb9545af-3003-42dc-998b-d98a81c9703c"></div>
+<div id="989710cc-bcb5-444c-b6ee-28737fe9ffbd"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#cb9545af-3003-42dc-998b-d98a81c9703c');
+var element = $('#989710cc-bcb5-444c-b6ee-28737fe9ffbd');
 Reveal.addEventListener("slidechanged", function(event){ window.location.hash = "header"; });
 </script>
 </div>
@@ -11937,7 +11937,7 @@ Reveal.addEventListener("slidechanged", function(event){ window.location.hash = 
 <p>Solution: Divide ${\cal L}$ into two disjoint parts called training and test sets (usually using 70% for training and 30% for test).</p>
 <ul>
 <li>Use the training set for fitting the model;</li>
-<li>Use the test set for evaluation only, thereby yielding an unbiased estimate.</li>
+<li>Use the test set for evaluation only, thereby yielding an better estimate of the generalization error.</li>
 </ul>
 
 </div>
@@ -12008,8 +12008,8 @@ Test error = 0.144
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Issue:</p>
 <ul>
-<li>When ${\cal L}$ is small, training on 70% of the data may lead to a model that is significantly different from a model that would have been learned on the entire set ${\cal L}$. </li>
-<li>Yet, increasing the size of the training set (resp. decreasing the size of the test set), might lead to an inaccurate estimate of the generalization error. </li>
+<li>When ${\cal L}$ is small, training on 70% of the data may lead to a model that is significantly different from a model that would have been learned on the entire set ${\cal L}$ (high bias). </li>
+<li>Yet, increasing the size of the training set (resp. decreasing the size of the test set), might lead to an inaccurate estimate of the generalization error (high variance). </li>
 </ul>
 
 </div>
@@ -12098,6 +12098,22 @@ Test error = 0.144
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>How to chose K?</p>
+<ul>
+<li>With K=N, the cross-validation estimator is approximately unbiased for the true (expected) prediction error, but can have high variance because the N training sets are so similar to one another.</li>
+<li>On the other hand, when K is too small, cross-validation has lower variance but bias could be a problem, depending on how the learning method varies with the size of the training set. </li>
+<li>Overall, 5 or 10-fold cross-validation are often recommended as a good compromise</li>
+</ul>
+<p><br /></p>
+<center><img src="img/cv-training-size.png" /></center>
+</div>
+</div>
 </div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
